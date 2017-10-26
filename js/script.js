@@ -16,16 +16,20 @@
         this.dbSuffix = this.fields[0].value;
 
         for(var i = 0; i < this.fields.length; i++){
-            this.dbVal[this.fields[i].getAttribute("name")] = this.fields[i].value;
-            this.fields[i].value = "";
+            if(this.fields[i].value === ""){
+                errMsg("Uzupełnij wszystkie pola");
+                return;
+            } else {
+                this.dbVal[this.fields[i].getAttribute("name")] = this.fields[i].value;
+                this.fields[i].value = "";
+            }
         }
-
         this.saveToLocalStorage();
     };
 
     DBSaver.prototype.saveToLocalStorage = function(){
         window.localStorage.setItem(( this.dbID + "." + this.dbSuffix ), JSON.stringify(this.dbVal));
-        info.textContent = "Poprawnie zapisano w bazie danych";
+        okMsg("Poprawnie zapisano w bazie danych");
         this.loadDBValues();
     };
 
@@ -37,7 +41,7 @@
             var dc = document.createDocumentFragment(),
                 h5 = document.createElement("h5");
 
-            h5.innerHTML = "----" + ( this.dbID + "." + this.dbSuffix ) + "----";;
+            h5.innerHTML = "----" + ( this.dbID + "." + this.dbSuffix ) + "----";
             dc.appendChild(h5);
 
             savedDB = JSON.parse(savedDB);
@@ -58,15 +62,23 @@
         info = document.createElement("span");
         info.classList.add("list-group-item");
 
-    if(typeof Storage === "function") {
-        info.classList.add("list-group-item-success");
-        info.textContent = "Wykryto wsparcie dla Web Storage";
+    function errMsg (mess){
+        info.classList.add("list-group-item-danger");
+        info.textContent = mess;
+    }
 
+    function okMsg (mess){
+        info.classList.remove("list-group-item-danger");
+        info.classList.add("list-group-item-success");
+        info.textContent = mess;
+    }
+
+    if(typeof Storage === "function") {
+        okMsg("Wykryto wsparcie dla Web Storage");
         var dbToSave = new DBSaver(document.querySelector("#db"));
 
     } else {
-        info.classList.add("list-group-item-danger");
-        info.textContent = "Brak wsparcia dla Web Storage";
+        errMsg("Brak wsparcia dla Web Storage");
     }
 
     output.appendChild(info);
